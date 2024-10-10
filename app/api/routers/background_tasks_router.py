@@ -1,15 +1,22 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.services.background_tasks_service import write_log, send_email
-from app.db.repository.mysql_repository import (get_mysql_record, create_mysql_record, update_mysql_record, delete_mysql_record)
-from app.db.repository.mongo_repository import (get_mongo_record, create_mongo_record, update_mongo_record, delete_mongo_record)
 from app.db.session import SessionLocal
 from app.db.models.mongo_model import MongoModel
+from app.db.repository.mysql_repository import (
+    get_mysql_record, 
+    create_mysql_record, 
+    update_mysql_record, 
+    delete_mysql_record)
+from app.db.repository.mongo_repository import (
+    get_mongo_record, 
+    create_mongo_record, 
+    update_mongo_record, 
+    delete_mongo_record)
 
 router = APIRouter()
 
 # Dependencia para la sesión de la base de datos
-
 def get_db():
     db = SessionLocal()
     try:
@@ -26,7 +33,8 @@ async def send_log(message: str, background_tasks: BackgroundTasks):
     return {"message": "El log se enviará en segundo plano y el correo se enviará después de 10 segundos"}
 
 @router.post("/mysql-record/")
-async def create_mysql(name: str, description: str, db: Session = Depends(get_db)):
+async def create_mysql(name: str, description: str, 
+                       db: Session = Depends(get_db)):
     return create_mysql_record(db, name, description)
 
 @router.get("/mysql-record/{record_id}")
@@ -37,7 +45,9 @@ async def read_mysql(record_id: int, db: Session = Depends(get_db)):
     return record
 
 @router.put("/mysql-record/{record_id}")
-async def update_mysql(record_id: int, name: str = None, description: str = None, db: Session = Depends(get_db)):
+async def update_mysql(record_id: int, name: str = None, 
+                       description: str = None, 
+                       db: Session = Depends(get_db)):
     return update_mysql_record(db, record_id, name, description)
 
 @router.delete("/mysql-record/{record_id}")

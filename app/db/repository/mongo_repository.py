@@ -1,10 +1,13 @@
 import motor.motor_asyncio
 from bson import ObjectId
 from app.db.models.mongo_model import MongoModel
+from pymongo import MongoClient
 
 MONGO_URI = "mongodb://mongodb:27017"
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
+client_sync = sync_client = MongoClient(MONGO_URI) 
 db = client.clean_architecture_db
+db_sync = client_sync.clean_architecture_db
 
 async def get_mongo_record(record_id: str):
     if not ObjectId.is_valid(record_id):
@@ -32,6 +35,12 @@ async def get_all_mongo_records():
 async def create_mongo_record(data):
     # Insertar directamente ya que `data` es un diccionario
     record = await db["mongo_collection"].insert_one(data)
+    # Convertir el ObjectId del registro creado a string para devolverlo
+    return str(record.inserted_id)
+
+def create_mongo_record_sync(data):
+    # Insertar el registro en la colección de MongoDB usando el cliente sincrónico
+    record = db_sync["mongo_collection"].insert_one(data)
     # Convertir el ObjectId del registro creado a string para devolverlo
     return str(record.inserted_id)
 

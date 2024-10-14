@@ -1,20 +1,10 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.services.background_tasks_service import write_log, send_email
+from app.services.background_tasks_service import send_repeated_email, write_log, send_email
 from app.db.session import SessionLocal
 from app.db.models.mongo_model import MongoModel
-from app.db.repository.mysql_repository import (
-    get_all_mysql_records,
-    get_mysql_record, 
-    create_mysql_record, 
-    update_mysql_record, 
-    delete_mysql_record)
-from app.db.repository.mongo_repository import (
-    get_all_mongo_records,
-    get_mongo_record, 
-    create_mongo_record, 
-    update_mongo_record, 
-    delete_mongo_record)
+from app.db.repository.mysql_repository import get_all_mysql_records
+from app.db.repository.mongo_repository import get_all_mongo_records
 
 router = APIRouter()
 
@@ -35,6 +25,14 @@ async def send_log(message: str, background_tasks: BackgroundTasks, delay_second
     background_tasks.add_task(send_email, delay_seconds, message)
     
     return {"message": f"El log se enviará en segundo plano y el correo se enviará después de {delay_seconds} segundos"}
+
+@router.post("/send-repeated-mails/")
+async def send_repeated_mails(background_tasks: BackgroundTasks, delay_seconds: int, repetitions: int, db: Session = Depends(get_db)):
+    # Agregar tarea para enviar correos repetidamente en segundo plano
+    
+    background_tasks.add_task(send_repeated_email, delay_seconds, repetitions, db)
+    
+    return {"message": f"El correo se enviará {repetitions} veces, con un retraso de {delay_seconds} segundos entre cada envío."}
 
 @router.get("/mysql-records/")
 async def read_all_mysql_records(db: Session = Depends(get_db)):

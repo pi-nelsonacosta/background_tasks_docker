@@ -1,5 +1,6 @@
 # Evitar que el entorno virtual venv se suba al repositorio
 /venv/
+venv
 
 # Evitar que archivos de entorno se suban
 .env

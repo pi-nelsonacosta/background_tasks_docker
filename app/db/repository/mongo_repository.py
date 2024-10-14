@@ -19,14 +19,21 @@ async def get_mongo_record(record_id: str):
     
     return record
 
-async def create_mongo_record(data: MongoModel):
-    # Insertar el documento en la base de datos
-    result = await db["mongo_collection"].insert_one(data.dict(by_alias=True, exclude={"id"}))
-    # Obtener el id insertado y devolverlo como string
-    inserted_id = str(result.inserted_id)
-    
-    # Devolver el registro con el id asignado
-    return {"id": inserted_id, **data.dict(exclude={"id"})}
+async def get_all_mongo_records():
+    cursor = db["mongo_collection"].find({})
+    records = []
+    async for document in cursor:
+        # Convertir `_id` de ObjectId a string para que sea serializable
+        document["id"] = str(document["_id"])
+        del document["_id"]
+        records.append(document)
+    return records
+
+async def create_mongo_record(data):
+    # Insertar directamente ya que `data` es un diccionario
+    record = await db["mongo_collection"].insert_one(data)
+    # Convertir el ObjectId del registro creado a string para devolverlo
+    return str(record.inserted_id)
 
 async def update_mongo_record(record_id: str, data: dict):
     try:

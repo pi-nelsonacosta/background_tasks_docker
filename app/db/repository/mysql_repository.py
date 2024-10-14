@@ -1,11 +1,14 @@
 from sqlalchemy.orm import Session
 from app.db.models.mysql_model import MySQLModel
 
+def get_all_mysql_records(db: Session):
+    return db.query(MySQLModel).all()
+
 def get_mysql_record(db: Session, record_id: int):
     return db.query(MySQLModel).filter(MySQLModel.id == record_id).first()
 
-def create_mysql_record(db: Session, name: str, description: str = None):
-    db_record = MySQLModel(name=name, description=description)
+def create_mysql_record(db: Session, description: str = None):
+    db_record = MySQLModel(name='Log', description=description)
     db.add(db_record)
     db.commit()
     db.refresh(db_record)

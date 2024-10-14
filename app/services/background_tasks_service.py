@@ -24,27 +24,28 @@ async def write_log(db: Session, message: str):
     with open("log.txt", "a") as log_file:
         log_file.write(f"MySQL ID: {log_record.id}, MongoDB ID: {mongo_id}, Mensaje: {message}\n")
 
-def send_email(background_tasks, delay_seconds: int):
-    def send():
-        try:
-            msg = MIMEMultipart()
-            msg['From'] = EMAIL_ADDRESS
-            msg['To'] = "nelsongacosta@gmail.com"
-            msg['Subject'] = "Prueba de envío de correo"
-
-            body = "Este es un correo enviado automáticamente después de {delay_seconds} segundos."
-            msg.attach(MIMEText(body, 'plain'))
-
-            server = smtplib.SMTP('smtp.gmail.com', 587)
-            server.starttls()
-            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-            text = msg.as_string()
-            server.sendmail(EMAIL_ADDRESS, "nelsongacosta@gmail.com", text)
-            server.quit()
-            background_tasks.add_task(write_log, "Correo enviado exitosamente")
-        except Exception as e:
-            background_tasks.add_task(write_log, f"Error al enviar el correo: {e}")
-
-    # Ejecutar la función de envío de correo después de 10 segundos
+def send_email(delay_seconds: int, message: str):
+    # Esperar el tiempo especificado antes de enviar el correo
     time.sleep(delay_seconds)
-    send()
+    
+    try:
+        # Preparar el correo
+        msg = MIMEMultipart()
+        msg['From'] = EMAIL_ADDRESS
+        msg['To'] = "nelsongacosta@gmail.com"
+        msg['Subject'] = "Prueba de envío de correo"
+
+        body = f"Este es un correo enviado automáticamente después de {delay_seconds} segundos. El mensaje enviado fue: {message}"
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Enviar el correo
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        text = msg.as_string()
+        server.sendmail(EMAIL_ADDRESS, "nelsongacosta@gmail.com", text)
+        server.quit()
+
+        print("Correo enviado exitosamente")
+    except Exception as e:
+        print(f"Error al enviar el correo: {e}")

@@ -26,13 +26,13 @@ def get_db():
     finally:
         db.close()
 
-@router.get("/send-log/")
+@router.post("/send-log/")
 async def send_log(message: str, background_tasks: BackgroundTasks, delay_seconds: int, db: Session = Depends(get_db)):
     # Programar la escritura del log como una tarea en segundo plano
     await write_log(db, message)
     
     # Agregar tarea para enviar correo después del tiempo especificado (manteniéndolo sincrónico)
-    background_tasks.add_task(send_email, background_tasks, delay_seconds)
+    background_tasks.add_task(send_email, delay_seconds, message)
     
     return {"message": f"El log se enviará en segundo plano y el correo se enviará después de {delay_seconds} segundos"}
 

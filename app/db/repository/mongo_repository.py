@@ -57,3 +57,10 @@ async def delete_mongo_record(record_id: str):
         return result.deleted_count
     except Exception as e:
         raise ValueError(f"Invalid ObjectId: {e}")
+
+async def delete_all_mongo_records():
+    try:
+        result = await db["mongo_collection"].delete_many({})
+        return result.deleted_count
+    except Exception as e:
+        raise ValueError(f"Error deleting records: {e}")    

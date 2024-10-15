@@ -31,3 +31,12 @@ def delete_mysql_record(db: Session, record_id: int):
         db.delete(db_record)
         db.commit()
     return db_record
+
+# MySQL: Delete all records
+def delete_all_mysql_records(db: Session):
+    try:
+        db.query(MySQLModel).delete()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise ValueError(f"Error deleting records: {e}")

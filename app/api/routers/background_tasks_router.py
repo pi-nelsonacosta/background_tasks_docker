@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from app.services.background_tasks_service import send_repeated_email, write_log, send_email
 from app.db.session import SessionLocal
 from app.db.models.mongo_model import MongoModel
-from app.db.repository.mysql_repository import get_all_mysql_records
-from app.db.repository.mongo_repository import get_all_mongo_records
+from app.db.repository.mysql_repository import delete_all_mysql_records, get_all_mysql_records
+from app.db.repository.mongo_repository import get_all_mongo_records, delete_all_mongo_records
 
 router = APIRouter()
 
@@ -16,22 +16,18 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/send-log/")
-async def send_log(message: str, background_tasks: BackgroundTasks, delay_seconds: int, db: Session = Depends(get_db)):
+@router.post("/send-mail/")
+async def send_mail(message: str, background_tasks: BackgroundTasks, delay_seconds: int, db: Session = Depends(get_db)):
     # Programar la escritura del log como una tarea en segundo plano
     await write_log(db, message)
-    
     # Agregar tarea para enviar correo después del tiempo especificado (manteniéndolo sincrónico)
     background_tasks.add_task(send_email, delay_seconds, message)
-    
     return {"message": f"El log se enviará en segundo plano y el correo se enviará después de {delay_seconds} segundos"}
 
 @router.post("/send-repeated-mails/")
 async def send_repeated_mails(background_tasks: BackgroundTasks, delay_seconds: int, repetitions: int, db: Session = Depends(get_db)):
     # Agregar tarea para enviar correos repetidamente en segundo plano
-    
     background_tasks.add_task(send_repeated_email, delay_seconds, repetitions, db)
-    
     return {"message": f"El correo se enviará {repetitions} veces, con un retraso de {delay_seconds} segundos entre cada envío."}
 
 @router.get("/mysql-records/")
@@ -40,6 +36,25 @@ async def read_all_mysql_records(db: Session = Depends(get_db)):
     if not records:
         raise HTTPException(status_code=404, detail="No records found")
     return records
+
+@router.get("/mongo-records/")
+async def read_all_mongo_records():
+    records = await get_all_mongo_records()
+    if not records:
+        raise HTTPException(status_code=404, detail="No records found")
+    return records
+
+# Endpoint to delete all MySQL records
+@router.delete("/mysql-records")
+async def delete_all_mysql(db: Session = Depends(get_db)):
+    delete_all_mysql_records(db)
+    return {"message": "All MySQL records deleted"}
+
+# Endpoint to delete all MongoDB records
+@router.delete("/mongo-records")
+async def delete_all_mongo():
+    deleted_count = await delete_all_mongo_records()
+    return {"message": f"All MongoDB records deleted: {deleted_count} records"}
 
 """ @router.post("/mysql-record/")
 async def create_mysql(description: str, 
@@ -66,13 +81,6 @@ async def delete_mysql(record_id: int, db: Session = Depends(get_db)):
 """ @router.post("/mongo-record/")
 async def create_mongo(data: MongoModel):
     return await create_mongo_record(data) """
-
-@router.get("/mongo-records/")
-async def read_all_mongo_records():
-    records = await get_all_mongo_records()
-    if not records:
-        raise HTTPException(status_code=404, detail="No records found")
-    return records
 
 """ @router.get("/mongo-record/{record_id}")
 async def read_mongo(record_id: str):

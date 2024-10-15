@@ -44,13 +44,11 @@ async def read_all_mongo_records():
         raise HTTPException(status_code=404, detail="No records found")
     return records
 
-# Endpoint to delete all MySQL records
 @router.delete("/mysql-records")
 async def delete_all_mysql(db: Session = Depends(get_db)):
     delete_all_mysql_records(db)
     return {"message": "All MySQL records deleted"}
 
-# Endpoint to delete all MongoDB records
 @router.delete("/mongo-records")
 async def delete_all_mongo():
     deleted_count = await delete_all_mongo_records()

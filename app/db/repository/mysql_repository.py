@@ -32,7 +32,6 @@ def delete_mysql_record(db: Session, record_id: int):
         db.commit()
     return db_record
 
-# MySQL: Delete all records
 def delete_all_mysql_records(db: Session):
     try:
         db.query(MySQLModel).delete()

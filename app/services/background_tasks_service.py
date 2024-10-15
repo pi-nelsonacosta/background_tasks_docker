@@ -50,7 +50,7 @@ def send_email(delay_seconds: int, message: str):
         # Preparar el correo
         msg = MIMEMultipart()
         msg['From'] = EMAIL_ADDRESS
-        msg['To'] = "nelsongacosta@gmail.com"
+        msg['To'] = "nelson.acosta@piconsulting.com.ar"
         msg['Subject'] = "Prueba de envío de correo"
 
         body = f"Este es un correo enviado automáticamente después de {delay_seconds} segundos. El mensaje enviado fue: {message}"
@@ -61,7 +61,7 @@ def send_email(delay_seconds: int, message: str):
         server.starttls()
         server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         text = msg.as_string()
-        server.sendmail(EMAIL_ADDRESS, "nelsongacosta@gmail.com", text)
+        server.sendmail(EMAIL_ADDRESS, "nelson.acosta@piconsulting.com.ar", text)
         server.quit()
 
         print("Correo enviado exitosamente")
@@ -74,7 +74,7 @@ def send_repeated_email(delay_seconds: int, repetitions: int, db: Session):
             # Preparar el correo
             msg = MIMEMultipart()
             msg['From'] = EMAIL_ADDRESS
-            msg['To'] = "nelsongacosta@gmail.com"
+            msg['To'] = "nelson.acosta@piconsulting.com.ar"
             msg['Subject'] = "Correo Repetitivo"
 
             body = f"Este es un correo enviado automáticamente, repetición {i + 1} de {repetitions}."
@@ -85,7 +85,7 @@ def send_repeated_email(delay_seconds: int, repetitions: int, db: Session):
             server.starttls()
             server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
             text = msg.as_string()
-            server.sendmail(EMAIL_ADDRESS, "nelsongacosta@gmail.com", text)
+            server.sendmail(EMAIL_ADDRESS, "nelson.acosta@piconsulting.com.ar", text)
             server.quit()
 
             print(f"Correo enviado exitosamente ({i + 1}/{repetitions})")
